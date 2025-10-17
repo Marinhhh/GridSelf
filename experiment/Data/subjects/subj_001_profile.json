@@ -1,0 +1,18 @@
+{
+  "SubjectID": "001",
+  "Name": "",
+  "NameHash": "e3b0c44298fc1c14",
+  "Sex": "Male",
+  "Age": 25,
+  "Handedness": "Right",
+  "Notes": "",
+  "SelfImageFile": "1.jpg",
+  "SelfImageSHA256": "cd4745ba8c21a0b7",
+  "LastSessionAt": "2025-10-06T14:56:11.041795",
+  "SchemaVersion": "cfg-1.0",
+  "SessionID": "001_A_Day2_20251006-145611",
+  "RunDay": "Day2",
+  "day1_dim": "com",
+  "day2_dim": "pop",
+  "CreatedAt": "2025-10-04T22:36:58.917603"
+}

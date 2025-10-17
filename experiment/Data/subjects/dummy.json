@@ -1,0 +1,15 @@
+{
+  "SubjectID": "001",
+  "Name": "",
+  "NameHash": "e3b0c44298fc1c14",
+  "Sex": "Male",
+  "Age": 25,
+  "Handedness": "Right",
+  "Notes": "",
+  "SelfImageFile": "1.jpg",
+  "SelfImageSHA256": "cd4745ba8c21a0b7",
+  "CreatedAt": "2025-10-10T17:00:52.659227",
+  "LastSessionAt": "2025-10-10T17:00:52.659227",
+  "SchemaVersion": "cfg-1.0",
+  "SessionID": "001_D_20251010-170052"
+}

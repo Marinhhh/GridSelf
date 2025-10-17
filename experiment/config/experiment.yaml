@@ -1,0 +1,204 @@
+meta:
+  schema_version: "cfg-1.0"  # 配置架构版本号，用于数据审计和兼容性检查
+  owner: "YourLab"  # 实验室名称，用于数据归属标识
+
+experiment:
+  name: "SelfReferenceGridTask"  # 实验名称，用于数据文件命名
+  seed: 20250927  # 主随机种子，用于生成被试特定种子，确保可复现性
+  fullscreen: false  # 是否全屏运行，false=窗口模式，true=全屏模式
+  window_size: [1200, 800]  # 窗口大小（像素），全屏时忽略，[宽度, 高度]
+  fps_hard_lock: false  # 是否强制锁定帧率，false=自适应，true=固定帧率
+  bg_color: [0.0039, 0.0039, 0.0039]  # 窗口背景颜色（RGB，-1到1范围），默认纯黑色
+
+paths:
+  stimuli_faces_dir: "stimuli/faces"  # 他人面孔图像目录，包含P1.png到P80.png
+  stimuli_self_dir: "stimuli/self"  # 自我面孔图像目录，被试选择的自我图像
+  data_dir: "Data"  # 数据输出根目录，包含A/B/C/D子目录
+  subjects_dir: "Data/subjects"  # 被试档案目录，存储profile.json和stim_table.csv
+  checkpoints_dir: "Data/checkpoints"  # 断点文件目录，用于实验恢复
+
+monitor:
+  name: "lab_default"  # 显示器名称，用于PsychoPy显示器配置
+  size_pix: [1920, 1080]  # 显示器像素分辨率，[宽度, 高度]
+  width_cm: 34.0  # 显示器物理宽度（厘米），用于度↔像素换算
+  distance_cm: 60.0  # 被试眼睛到屏幕距离（厘米），用于视角计算
+  screen: 0  # 多屏环境下的屏幕索引，0=主屏幕
+
+window_units: "pix"  # 窗口单位，pix=像素，deg=度，norm=归一化
+
+stimuli:
+  n_faces: 24  # 他人面孔数量，文件名P1.png到P80.png
+  coord_limit: 2  # 坐标范围限制，[-2, +2]，共5×5=25个格点
+  exclude_origin: true  # 是否排除原点(0,0)，他人面孔不使用(0,0)坐标
+  assign_coords_if_missing: true  # 缺失坐标时是否自动分配，true=自动生成
+  angle_bins: 12  # 角度分桶数量，每30度一桶（0-11），仅用于他人面孔
+
+self_stim:  # 自我面孔配置，S=0在四阶段都参与
+  required: true  # 是否必须选择自我图像，true=强制选择
+  allow_in_phase_a: true  # A阶段是否允许自我面孔参与试次
+  allow_in_phase_b: true  # B阶段是否允许自我面孔参与试次
+  allow_in_phase_c: true  # C阶段是否允许自我面孔参与试次
+  allow_in_phase_d: true  # D阶段是否允许自我面孔参与试次，D阶段固定显示在(0,0)
+  quota_per_block_a_learn: 4  # A学习阶段每批次自我面孔最少试次数
+  quota_per_block_a_test: 4  # A测试阶段每批次自我面孔最少试次数
+  quota_per_block_a_inter: 4  # A交错阶段每批次自我面孔最少试次数
+  quota_per_block_b: 0  # B阶段每批次自我面孔最少试次数
+  quota_per_block_c: 0  # C阶段每批次自我面孔最少试次数
+  treat_self_as_own_bin: true  # 自我面孔是否单独成桶，true=不计入他人角度均衡统计
+  render_overlay_ring: true  # 是否渲染自我面孔环形高亮，true=显示黄色圆圈
+
+pools:
+  seed_strategy: "subject_seed"     # 用被试ID+全局seed派生子种子
+  save_path_pattern: "Data/subjects/subj_{id}_pools.json"
+
+slider:  # 滑块配置（B/C阶段使用）
+  # 水平"距离"Slider
+  distance_ticks: [-3,-1,0,1,3]
+  distance_step: 0.1
+  # 右侧两根垂直 Slider（Com/Pop）
+  component_ticks: [-2,-1,0,1,2]
+  component_step: 0.1
+  vertical_direction: "up_increase"   # 或 "up_decrease"
+
+tolerance:
+  distance_abs: 0.5  # 评分正确阈值τ，误差小于此值判定为正确
+  component_abs: 0.0              # 向量分量容差（0表示完全对上才算正确）
+
+# ----------------------------- Phase A -----------------------------
+phase_a:  # A阶段：两日训练+交错测试
+  learn: { fixation_s: 0.8, stim_window_s: 2.5, response_deadline_s: 2.5, feedback_s: 0.5, iti_s_uniform: [1.0, 3.0] }  # 学习阶段时序：注视0.8s，刺激2.5s，反应时限2.5s，反馈0.5s，ITI随机1-3s
+  test:  { fixation_s: 0.8, stim_window_s: 2.5, response_deadline_s: 2.5, feedback_s: 0.0, iti_s_uniform: [1.0, 3.0] }  # 测试阶段时序：注视0.8s，刺激2.5s，反应时限2.5s，无反馈，ITI随机1-3s
+  interleaved_test:  # 交错测试时序（严格固定）
+    dim_cue_s: 1.0  # 维度提示显示时长（秒）
+    fixation_white_s: 1.5  # 白色注视点时长（秒）
+    p1_s: 2.0  # P1面孔呈现时长（秒）
+    fixation_purple_uniform_s: [4.0, 10.0]  # 紫色注视点随机时长范围（秒）
+    p2_s: 2.0  # P2面孔呈现时长（秒）
+    fixation_green_uniform_s: [4.0, 10.0]  # 绿色注视点随机时长范围（秒）
+    next_dim_cue_s: 1.0  # 下一个维度提示显示时长（秒）
+  criteria:  # A阶段达标标准
+    accuracy_target: 90  # 目标准确率（90%），Day1/Day2测试阶段达标阈值
+    policy: "until_threshold"  # 达标策略：until_threshold=直到达标才结束
+    trials_batch_size: 10 # 每轮追加试次数量；A<90%时按这个步长继续追加
+
+# ----------------------------- Phase B -----------------------------
+phase_b:  # B阶段：自我参照评分训练（直到达标≥95%）
+  self_s: 2.5
+  fixation_white_jitter_s: [1.0, 2.0]
+  p1_s: -1          # <=0 表示"无限直到按空格确认"
+  purple_s: 3.0
+  p2_self_s: 2.5
+  p2_fixation_white_jitter_s: [1.0, 2.0]
+  p2_s: -1          # <=0 表示"无限直到按空格确认"
+
+  blocks: 3 # 组块数
+  trials_per_block: 48 # 每块试次数
+
+  criteria:
+    accuracy_target: 0.95     # 距离任务与向量任务取其高者 ≥ 阈值即可
+    count_policy: "either"
+# ----------------------------- Phase C -----------------------------
+phase_c:  # C阶段：自我参照评分正式（3×48，无早停）
+  self_s: 2.5
+  fixation_white_jitter_s: [1.0, 2.0]
+  p1_s: 5.0         # 定时
+  purple_s: 3.0
+  p2_self_s: 2.5
+  p2_fixation_white_jitter_s: [1.0, 2.0]
+  p2_s: 5.0         # 定时
+
+  blocks: 3 # 组块数
+  trials_per_block: 48 # 每块试次数
+
+  criteria:
+    accuracy_target: 0.95
+    count_policy: "either"
+
+# ----------------------------- Phase D -----------------------------
+phase_d:                                  # 组：拖拽重建阶段的全部配置
+  timeout_s: 3600                         # int 任务总时长（秒）；倒计时为 0 时自动结束并保存
+  include_self: true                      # bool 是否在左侧平铺中包含自我 S
+  can_drag_self: true                     # bool 自我 S 是否允许被拖拽；设为 false 时 S 只能停在原位（相当于"锁定"）
+
+  # ------------------------- 左侧平铺区 -------------------------
+  left_panel:                             # 组：左侧平铺栏的几何与排版
+    width_frac: 0.1                      # float 左侧平铺区域占整个窗口宽度的比例（0~1）；其余给右侧网格
+    hpad_px: 24                           # int 左右内边距（像素）；影响平铺列的起始 X
+    top_pad_px: 24                        # int 顶部内边距（像素）；影响第一行平铺的起始 Y
+    vgap_px: 16                           # int 同一列内相邻头像的竖向间距（像素）
+
+  # --------------------------- 头像 tile ---------------------------
+  tile:                                   # 组：平铺与网格内的头像方块
+    max_width_px: 120                     # int 头像方块的最大边长（像素，方形）；实际会受网格单元大小上限约束
+    border_px: 2                          # int 头像边框的逻辑厚度（当前仅作为保留字段，未绘制可忽略）
+    preload_thumb_px: 120                 # int 读图时的目标缩略尺寸（像素）；通常与 max_width_px 一致即可
+
+  # ---------------------------- 右侧网格 ----------------------------
+  grid:                                   # 组：仅用于吸附/映射；可选择是否把小格线画出来
+    n: 5                                  # int 网格为 n×n 个单元（影响单元数与坐标量化网格）
+    stroke_px: 10                          # int 小格线/轴线的线宽（像素）
+    gap_px: 2                             # int 单元内部的"内缩"像素，避免贴边；影响吸附区域与图片贴边感
+    color: "white"                        # str 网格线与坐标轴线的颜色（PsychoPy 支持的颜色名或[RGB]）
+    show_cells: true                     # bool 是否显示全部小格线；false 时只画两条坐标轴线
+    center_on_screen: true               # bool 是否让网格区域整体居中到屏幕（true=居中；false=贴右侧区域）
+    x_offset_px: 200                        # int 网格相对水平居中的微调（像素；+右移，-左移）
+    y_offset_px: 0                        # int 网格相对垂直居中的微调（像素；+上移，-下移）
+
+  # -------------------------- 轴范围与标签 --------------------------
+  axes:                                   # 组：坐标轴数值范围
+    show: false                            # bool 是否绘制坐标轴（横/纵）
+    range: [-4, 4]                        # list [min,max] 轴的连续数值范围；若缺省则用 slider.component_ticks 的首末值
+    stroke_px: null                       # int 可选：若为空则用 grid.stroke_px
+    color: null                           # str 可选：若为空则用 grid.color
+
+  labels:                                 # 组：坐标轴标签文案与位置
+    show: true                            # bool 是否绘制文本标签
+    x: "能力"                             # str 横轴标题文本
+    y: "受欢迎度"                         # str 纵轴标题文本
+    xmin: "低"                            # str 横轴最小值文本（显示在左端）
+    xmax: "高"                            # str 横轴最大值文本（显示在右端）
+    ymin: "低"                            # str 纵轴最小值文本（显示在下端）
+    ymax: "高"                            # str 纵轴最大值文本（显示在上端）
+    color: "white"                        # str 全部轴标签文本颜色
+    offsets_px:
+    #dx: 水平偏移 正数向右 负数向左
+    #dy: 垂直偏移 正数向上 负数向下
+      x:    { 'dx': 560,  'dy': 40 }   # 横轴标题
+      y:    { 'dx': -50, 'dy': 0 }   # 纵轴标题
+      xmin: { 'dx': -25,  'dy': 0 }   # 横轴左端文本
+      xmax: { 'dx': 20,  'dy': 0 }   # 横轴右端文本
+      ymin: { 'dx': -40, 'dy': 30 }   # 纵轴下端文本
+      ymax: { 'dx': -40, 'dy': -10 }   # 纵轴上端文本
+
+  # ------------------------------ 颜色 ------------------------------
+  colors:                                 # 组：与 Phase D 相关的附加颜色（窗口背景请用 experiment.bg_color 配置）
+    self_marker: [0.8, 0.8, 0.0]          # list<float,float,float> 自我 S 的环形标记颜色（-1~1 或 0~1 范围均可，取决于 Window 的 colorSpace）
+
+
+# 维度颜色配置
+dimension_colors:
+  dim1_hint: "#FFC247"  # 维度1提示色块颜色（能力维度）
+  dim2_hint: "#4F5DFF"  # 维度2提示色块颜色（受欢迎度维度）dodgerblue
+
+# 开发调试配置（可选）
+dev:
+  fast_test: false  # 是否启用快速测试模式
+  test_delta_exact_1: true  # 测试用Δ=1（与学习同难度）；false则Δ≥1
+  test_only_seen_faces: true  # 测试只用"刚学过"出现过的刺激
+  test_from_recent_learn: true  # 测试只从"刚结束的这一批学习trial"里派生候选
+  recent_pool_size: 24  # 备选：若需要"最近N个学习trial"作为候选池
+  min_test_trials: 2  # 每次测试最少出题数（与trials_batch_size并行，取两者较小）
+  stop_on_first_pass: true  # 本次测试一旦达到阈值立刻收尾（不必把这批测完）
+
+# 渲染选项
+render:
+  grid:
+    cell_px: 110             # 单格边长
+    gap_px: 16               # 格间距
+    pad_px: 40               # 画布四周留白
+    face_inset_ratio: 0.9    # 缩略图相对cell的最大占比
+    draw_axes: true          # 是否绘制坐标轴
+    show_ids: false          # 是否在缩略图上覆写"Pxx"
+    highlight_self_ring: true # 是否高亮自我环
+    ring_line_px: 6          # 自我环线宽
+    ring_color: "#FFD400"    # 自我环颜色
